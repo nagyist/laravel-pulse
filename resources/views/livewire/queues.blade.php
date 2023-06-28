@@ -1,5 +1,5 @@
 <x-pulse::card
-    class="col-span-2"
+    :width="$width"
     wire:poll=""
 >
     <x-slot:title>

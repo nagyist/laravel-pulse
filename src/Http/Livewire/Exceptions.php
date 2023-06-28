@@ -20,6 +20,13 @@ class Exceptions extends Component implements ShouldNotReportUsage
     public $orderBy;
 
     /**
+     * The width of the component.
+     *
+     * @var string
+     */
+    public $width;
+
+    /**
      * The query string parameters.
      *
      * @var array
@@ -31,10 +38,12 @@ class Exceptions extends Component implements ShouldNotReportUsage
     /**
      * Handle the mount event.
      *
+     * @param  string  $width
      * @return void
      */
-    public function mount()
+    public function mount($width = '1/2')
     {
+        $this->width = $width;
         $this->orderBy = $this->orderBy ?: 'count';
     }
 

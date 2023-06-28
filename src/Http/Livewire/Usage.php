@@ -21,6 +21,13 @@ class Usage extends Component implements ShouldNotReportUsage
     public $usage;
 
     /**
+     * The width of the component.
+     *
+     * @var string
+     */
+    public $width;
+
+    /**
      * The query string parameters.
      *
      * @var array
@@ -32,10 +39,12 @@ class Usage extends Component implements ShouldNotReportUsage
     /**
      * Handle the mount event.
      *
+     * @param  string  $width
      * @return void
      */
-    public function mount()
+    public function mount($width = '1/2')
     {
+        $this->width = $width;
         $this->usage = $this->usage ?: 'request_counts';
     }
 

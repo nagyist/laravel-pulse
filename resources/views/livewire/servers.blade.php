@@ -12,7 +12,7 @@ $friendlySize = function(int $mb, int $precision = 0) {
 @if ($servers->count() > 0)
     <div
         wire:poll.15s
-        class="col-span-6"
+        class="col-span-12"
     >
         <script wire:ignore>
             window.charts = {}

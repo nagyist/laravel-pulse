@@ -44,7 +44,7 @@
             </header>
 
             <main class="p-5">
-                <div class="container mx-auto grid grid-cols-6 gap-6">
+                <div class="container mx-auto grid grid-cols-12 gap-6">
                     {{ $slot }}
                 </div>
             </main>
