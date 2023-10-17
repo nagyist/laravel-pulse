@@ -36,7 +36,7 @@ class Exceptions
         $now = new CarbonImmutable;
 
         return $this->connection()->table('pulse_exceptions')
-            ->selectRaw('MAX(`class`) AS `class`, MAX(`location`) AS `location`, COUNT(*) AS `count`, MAX(`date`) AS `last_occurrence`')
+            ->selectRaw('ANY_VALUE(`class`) AS `class`, ANY_VALUE(`location`) AS `location`, COUNT(*) AS `count`, MAX(`date`) AS `last_occurrence`')
             ->where('date', '>', $now->subSeconds((int) $interval->totalSeconds)->toDateTimeString())
             ->groupBy('class_location_hash')
             ->orderByDesc($orderBy)
