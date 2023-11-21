@@ -3,6 +3,7 @@
 namespace Laravel\Pulse\Recorders;
 
 use Illuminate\Config\Repository;
+use Illuminate\Support\Facades\DB;
 use Laravel\Pulse\Entry;
 use Laravel\Pulse\Events\Beat;
 use RuntimeException;
@@ -41,6 +42,39 @@ class SystemStats
         if ($event->time->second % 15 !== 0) {
             return null;
         }
+
+        DB::table('pulse_entries')->insert([
+            'timestamp' => $event->time->timestamp,
+            'type' => 'cpu',
+            'key' => $this->config->get('pulse.recorders.'.self::class.'.server_name'),
+            'value' => match (PHP_OS_FAMILY) {
+                'Darwin' => (int) `top -l 1 | grep -E "^CPU" | tail -1 | awk '{ print $3 + $5 }'`,
+                'Linux' => (int) `top -bn1 | grep '%Cpu(s)' | tail -1 | grep -Eo '[0-9]+\.[0-9]+' | head -n 4 | tail -1 | awk '{ print 100 - $1 }'`,
+                default => throw new RuntimeException('The pulse:check command does not currently support '.PHP_OS_FAMILY),
+            },
+        ]);
+
+        DB::table('pulse_entries')->insert([
+            'timestamp' => $event->time->timestamp,
+            'type' => 'memory',
+            'key' => $this->config->get('pulse.recorders.'.self::class.'.server_name'),
+            'value' => match (PHP_OS_FAMILY) {
+                'Darwin' => intval(`sysctl hw.memsize | grep -Eo '[0-9]+'` / 1024 / 1024) - (intval(intval(`vm_stat | grep 'Pages free' | grep -Eo '[0-9]+'`) * intval(`pagesize`) / 1024 / 1024)), // MB
+                'Linux' => intval(`cat /proc/meminfo | grep MemTotal | grep -E -o '[0-9]+'` / 1024) - intval(`cat /proc/meminfo | grep MemAvailable | grep -E -o '[0-9]+'` / 1024), // MB
+                default => throw new RuntimeException('The pulse:check command does not currently support '.PHP_OS_FAMILY),
+            },
+        ]);
+
+        collect($this->config->get('pulse.recorders.'.self::class.'.directories'))->each(function ($directory) use ($event) {
+            DB::table('pulse_entries')->insert([
+                'timestamp' => $event->time->timestamp,
+                'type' => 'storage',
+                'key' => $this->config->get('pulse.recorders.'.self::class.'.server_name').':'.$directory,
+                'value' => intval(round((disk_total_space($directory) - disk_free_space($directory)) / 1024 / 1024)), // MB
+            ]);
+        });
+
+        return null;
 
         return new Entry($this->table, [
             'date' => $event->time->toDateTimeString(),

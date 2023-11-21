@@ -20,6 +20,27 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('pulse_entries', function (Blueprint $table) {
+            // $table->id();
+            $table->unsignedInteger('timestamp');
+            $table->string('type');
+            $table->string('key');
+            $table->unsignedInteger('value');
+
+            $table->index('key');
+            $table->index(['timestamp', 'type', 'key', 'value']); // TODO: This is a guess.
+        });
+
+        Schema::create('pulse_aggregates', function (Blueprint $table) {
+            $table->unsignedInteger('bucket');
+            $table->unsignedMediumInteger('period');
+            $table->string('type');
+            $table->string('key');
+            $table->unsignedInteger('value');
+
+            $table->index(['period', 'bucket', 'type']); // TODO: This is a guess.
+        });
+
         Schema::create('pulse_system_stats', function (Blueprint $table) {
             $table->datetime('date');
             $table->string('server');
