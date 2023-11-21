@@ -6,9 +6,9 @@ use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Str;
 use Laravel\Pulse\Queries\Servers as ServersQuery;
 use Livewire\Attributes\Lazy;
 
@@ -57,7 +57,7 @@ class Servers extends Card
                     ->where('timestamp', '>=', max($firstBucket, $latestAggregatedBucket + $secondsPerPeriod))
                     ->where('timestamp', '<', $currentBucket)
                     ->groupBy('key', 'bucket', 'type')
-                    // ->get()->dd();
+                // ->get()->dd();
             );
         }
 
@@ -92,14 +92,14 @@ class Servers extends Card
                 ->groupBy('type')
                 ->map(fn ($readings) => $padding->merge(
                     $readings->mapWithKeys(fn ($row) => [
-                        Carbon::createFromTimestamp($row->bucket)->toDateTimeString() => (int) $row->value
+                        Carbon::createFromTimestamp($row->bucket)->toDateTimeString() => (int) $row->value,
                     ])
                 ))
             )->dump();
 
-// select `key`, max(`timestamp`) as `timestamp`, (select `value` from `pulse_entries` as t1 where `t1`.`key` = `t`.`key` order by `timestamp` desc limit 1) as `value`
-// from `pulse_entries` as t
-// where `type` = 'storage'
+        // select `key`, max(`timestamp`) as `timestamp`, (select `value` from `pulse_entries` as t1 where `t1`.`key` = `t`.`key` order by `timestamp` desc limit 1) as `value`
+        // from `pulse_entries` as t
+        // where `type` = 'storage'
 
         // $storage = DB::table('pulse_entries', as: 't')
         //     ->addSelect('key')
@@ -150,9 +150,9 @@ class Servers extends Card
                 'grouped',
                 fn ($join) => $join
                     ->on('pulse_entries.key', '=', 'grouped.key')
-                    // ->on('pulse_entries.timestamp', '=', 'grouped.timestamp')
+                // ->on('pulse_entries.timestamp', '=', 'grouped.timestamp')
             )
-                ->dumpRawSql()
+            ->dumpRawSql()
             ->get()->dd();
         //     ->map(function ($row) {
         //         if ($row->type === 'storage') {
@@ -205,14 +205,11 @@ class Servers extends Card
             'runAt' => 0,
         ]);
 
-
         // Retrieve aggregated buckets
 
         [$servers, $time, $runAt] = $this->remember($query);
 
         dd($servers['pulse-demo']->readings);
-
-
 
         if (request()->hasHeader('X-Livewire')) {
             $this->dispatch('servers-chart-update', servers: $servers);
