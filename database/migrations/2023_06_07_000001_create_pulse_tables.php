@@ -20,6 +20,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('pulse_values', function (Blueprint $table) {
+            $table->string('key');
+            $table->text('value');
+
+            $table->unique('key');
+        });
+
         Schema::create('pulse_entries', function (Blueprint $table) {
             // $table->id();
             $table->unsignedInteger('timestamp');
