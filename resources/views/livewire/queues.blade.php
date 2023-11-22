@@ -65,13 +65,7 @@
                             </h3>
                             @php $latest = $readings->last() @endphp
                             @php
-                                $highest = $readings->map(fn ($reading) => max(
-                                    $reading->queued,
-                                    $reading->processing,
-                                    $reading->released,
-                                    $reading->processed,
-                                    $reading->failed,
-                                ))->max()
+                                $highest = $readings->map(fn ($reading) => $reading->max())->max()
                             @endphp
 
                             <div class="mt-3 relative">
@@ -93,36 +87,36 @@
                                                 {
                                                     type: 'line',
                                                     data: {
-                                                        labels: @js(collect($readings)->pluck('date')),
+                                                        labels: @js($readings->first()->keys()),
                                                         datasets: [
                                                             {
                                                                 label: 'Queued',
                                                                 borderColor: 'rgba(107,114,128,0.5)',
-                                                                data: @js(collect($readings)->pluck('queued')->map(fn ($reading) => $reading * (1 / $config['sample_rate']))),
+                                                                data: @js($readings->get('queued')->map(fn ($value) => $value * (1 / $config['sample_rate']))),
                                                                 order: 4,
                                                             },
                                                             {
                                                                 label: 'Processing',
                                                                 borderColor: 'rgba(147,51,234,0.5)',
-                                                                data: @js(collect($readings)->pluck('processing')->map(fn ($reading) => $reading * (1 / $config['sample_rate']))),
+                                                                data: @js($readings->get('processing')->map(fn ($value) => $value * (1 / $config['sample_rate']))),
                                                                 order: 3,
                                                             },
                                                             {
                                                                 label: 'Released',
                                                                 borderColor: '#eab308',
-                                                                data: @js(collect($readings)->pluck('released')->map(fn ($reading) => $reading * (1 / $config['sample_rate']))),
+                                                                data: @js($readings->get('released')->map(fn ($value) => $value * (1 / $config['sample_rate']))),
                                                                 order: 2,
                                                             },
                                                             {
                                                                 label: 'Processed',
                                                                 borderColor: '#9333ea',
-                                                                data: @js(collect($readings)->pluck('processed')->map(fn ($reading) => $reading * (1 / $config['sample_rate']))),
+                                                                data: @js($readings->get('processed')->map(fn ($value) => $value * (1 / $config['sample_rate']))),
                                                                 order: 1,
                                                             },
                                                             {
                                                                 label: 'Failed',
                                                                 borderColor: '#e11d48',
-                                                                data: @js(collect($readings)->pluck('failed')->map(fn ($reading) => $reading * (1 / $config['sample_rate']))),
+                                                                data: @js($readings->get('failed')->map(fn ($value) => $value * (1 / $config['sample_rate']))),
                                                                 order: 0,
                                                             },
                                                         ],
@@ -155,9 +149,10 @@
                                                             y: {
                                                                 display: false,
                                                                 min: 0,
-                                                                ticks: {
-                                                                    stepSize: 1,
-                                                                },
+                                                                max: {{ $highest }},
+                                                                // ticks: {
+                                                                //     stepSize: 1,
+                                                                // },
                                                             },
                                                         },
                                                         plugins: {
@@ -191,12 +186,12 @@
                                                     return
                                                 }
 
-                                                chart.data.labels = queues['{{ $queue }}'].map(reading => reading.date)
-                                                chart.data.datasets[0].data = queues['{{ $queue }}'].map(reading => reading.queued * (1 / {{ $config['sample_rate']}}))
-                                                chart.data.datasets[1].data = queues['{{ $queue }}'].map(reading => reading.processing * (1 / {{ $config['sample_rate']}}))
-                                                chart.data.datasets[2].data = queues['{{ $queue }}'].map(reading => reading.released * (1 / {{ $config['sample_rate']}}))
-                                                chart.data.datasets[3].data = queues['{{ $queue }}'].map(reading => reading.processed * (1 / {{ $config['sample_rate']}}))
-                                                chart.data.datasets[4].data = queues['{{ $queue }}'].map(reading => reading.failed * (1 / {{ $config['sample_rate']}}))
+                                                chart.data.labels = Object.keys(queues['{{ $queue }}'].queued)
+                                                chart.data.datasets[0].data = Object.values(queues['{{ $queue }}'].queued).map(value => value * (1 / {{ $config['sample_rate']}}))
+                                                chart.data.datasets[1].data = Object.values(queues['{{ $queue }}'].processing).map(value => value * (1 / {{ $config['sample_rate']}}))
+                                                chart.data.datasets[2].data = Object.values(queues['{{ $queue }}'].released).map(value => value * (1 / {{ $config['sample_rate']}}))
+                                                chart.data.datasets[3].data = Object.values(queues['{{ $queue }}'].processed).map(value => value * (1 / {{ $config['sample_rate']}}))
+                                                chart.data.datasets[4].data = Object.values(queues['{{ $queue }}'].failed).map(value => value * (1 / {{ $config['sample_rate']}}))
                                                 chart.update()
                                             })
                                         }
