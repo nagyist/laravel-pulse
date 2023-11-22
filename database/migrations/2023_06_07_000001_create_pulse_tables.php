@@ -23,30 +23,44 @@ return new class extends Migration
         Schema::create('pulse_values', function (Blueprint $table) {
             $table->string('key');
             $table->text('value');
+            $table->unsignedInteger('updated');
+            $table->unsignedInteger('expires')->nullable();
 
             $table->unique('key');
+            $table->index('expires');
         });
 
         Schema::create('pulse_entries', function (Blueprint $table) {
-            // $table->id();
             $table->unsignedInteger('timestamp');
             $table->string('type');
-            $table->string('key');
-            $table->unsignedInteger('value');
+            $table->text('key');
+            $table->char('key_hash', 16)->charset('binary')->virtualAs('UNHEX(MD5(`key`))');
+            $table->unsignedInteger('value')->nullable();
 
             $table->index('key');
-            $table->index(['timestamp', 'type', 'key', 'value']); // TODO: This is a guess.
+            $table->index(['timestamp', 'type', 'key_hash', 'value']); // TODO: This is a guess.
         });
 
         Schema::create('pulse_aggregates', function (Blueprint $table) {
             $table->unsignedInteger('bucket');
             $table->unsignedMediumInteger('period');
             $table->string('type');
-            $table->string('key');
+            $table->text('key');
             $table->unsignedInteger('value');
 
             $table->index(['period', 'bucket', 'type']); // TODO: This is a guess.
         });
+
+        Schema::create('pulse_leaderboards', function (Blueprint $table) {
+            $table->unsignedMediumInteger('period');
+            $table->string('type');
+            $table->text('key');
+            $table->unsignedInteger('score');
+
+            $table->index(['type', 'period', 'key', 'score']); // TODO: This is a guess.
+        });
+
+        // ---
 
         Schema::create('pulse_system_stats', function (Blueprint $table) {
             $table->datetime('date');
