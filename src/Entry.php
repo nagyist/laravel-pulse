@@ -11,7 +11,7 @@ class Entry
         public int $timestamp,
         public string $type,
         public string $key,
-        public int $value = null,
+        public ?int $value = null,
     ) {
         //
     }
