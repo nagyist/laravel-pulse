@@ -21,17 +21,26 @@ class Servers extends Card
      */
     public function render(ServersQuery $query): Renderable
     {
-        // Backfill missing aggregate buckets for the selected period.
-        DB::listen(dump(...));
-
         $now = new CarbonImmutable();
 
-        $systems = DB::table('pulse_values')
+        $servers = DB::table('pulse_values')
             ->where('key', 'like', 'system:%')
             ->get()
-            ->mapWithKeys(fn ($system) => [
-                Str::after($system->key, 'system:') => json_decode($system->value),
-            ]);
+            ->mapWithKeys(function ($system) use ($now) {
+                $slug = Str::after($system->key, 'system:');
+                $values = json_decode($system->value);
+
+                return [$slug => (object) [
+                    'name' => $values->name,
+                    'slug' => $values->name,
+                    'cpu_current' => $values->cpu,
+                    'memory_current' => $values->memory_used,
+                    'memory_total' => $values->memory_total,
+                    'storage' => $values->storage,
+                    'updated_at' => $updatedAt = Carbon::createFromTimestamp($values->timestamp),
+                    'recently_reported' => (bool) $updatedAt->isAfter($now->subSeconds(30)),
+                ]];
+            });
 
         $interval = $this->periodAsInterval();
 
@@ -99,28 +108,19 @@ class Servers extends Card
                     ])
                 ))
             )
-            ->each(function ($readings, $server) use (&$systems) {
-                $systems[$server]->cpu = $readings['cpu']?->toArray() ?? [];
-                $systems[$server]->memory = $readings['memory']?->toArray() ?? [];
+            ->each(function ($readings, $server) use (&$servers) {
+                $servers[$server]->cpu = $readings['cpu']?->toArray() ?? [];
+                $servers[$server]->memory = $readings['memory']?->toArray() ?? [];
             });
 
-        dump($systems->toArray());
-
-        return View::make('pulse::livewire.servers', [
-            'servers' => collect([]),
-            'time' => 0,
-            'runAt' => 0,
-        ]);
-
-        // Retrieve aggregated buckets
-
-        [$servers, $time, $runAt] = $this->remember($query);
-
-        dd($servers['pulse-demo']->readings);
+        // [$servers, $time, $runAt] = $this->remember($query);
 
         if (request()->hasHeader('X-Livewire')) {
             $this->dispatch('servers-chart-update', servers: $servers);
         }
+
+        $time = 0;
+        $runAt = 0;
 
         return View::make('pulse::livewire.servers', [
             'servers' => $servers,

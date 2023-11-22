@@ -53,12 +53,26 @@ class SystemStats
             default => throw new RuntimeException('The pulse:check command does not currently support '.PHP_OS_FAMILY),
         };
 
+        $memoryUsed = match (PHP_OS_FAMILY) {
+            'Darwin' => $memoryTotal - intval(intval(`vm_stat | grep 'Pages free' | grep -Eo '[0-9]+'`) * intval(`pagesize`) / 1024 / 1024), // MB
+            'Linux' => $memoryTotal - intval(`cat /proc/meminfo | grep MemAvailable | grep -E -o '[0-9]+'` / 1024), // MB
+            default => throw new RuntimeException('The pulse:check command does not currently support '.PHP_OS_FAMILY),
+        };
+
+        $cpu = match (PHP_OS_FAMILY) {
+            'Darwin' => (int) `top -l 1 | grep -E "^CPU" | tail -1 | awk '{ print $3 + $5 }'`,
+            'Linux' => (int) `top -bn1 | grep '%Cpu(s)' | tail -1 | grep -Eo '[0-9]+\.[0-9]+' | head -n 4 | tail -1 | awk '{ print 100 - $1 }'`,
+            default => throw new RuntimeException('The pulse:check command does not currently support '.PHP_OS_FAMILY),
+        };
+
         DB::table('pulse_values')->updateOrInsert([
             'key' => 'system:'.$slug,
         ], ['value' => json_encode([
             'name' => $server,
             'timestamp' => $event->time->timestamp,
+            'memory_used' => $memoryUsed,
             'memory_total' => $memoryTotal,
+            'cpu' => $cpu,
             'storage' => collect($this->config->get('pulse.recorders.'.self::class.'.directories')) // @phpstan-ignore argument.templateType
                 ->map(fn (string $directory) => [
                     'directory' => $directory,
@@ -72,22 +86,14 @@ class SystemStats
             'timestamp' => $event->time->timestamp,
             'type' => 'cpu',
             'key' => $slug,
-            'value' => match (PHP_OS_FAMILY) {
-                'Darwin' => (int) `top -l 1 | grep -E "^CPU" | tail -1 | awk '{ print $3 + $5 }'`,
-                'Linux' => (int) `top -bn1 | grep '%Cpu(s)' | tail -1 | grep -Eo '[0-9]+\.[0-9]+' | head -n 4 | tail -1 | awk '{ print 100 - $1 }'`,
-                default => throw new RuntimeException('The pulse:check command does not currently support '.PHP_OS_FAMILY),
-            },
+            'value' => $cpu,
         ]);
 
         DB::table('pulse_entries')->insert([
             'timestamp' => $event->time->timestamp,
             'type' => 'memory',
             'key' => $slug,
-            'value' => match (PHP_OS_FAMILY) {
-                'Darwin' => $memoryTotal - intval(intval(`vm_stat | grep 'Pages free' | grep -Eo '[0-9]+'`) * intval(`pagesize`) / 1024 / 1024), // MB
-                'Linux' => $memoryTotal - intval(`cat /proc/meminfo | grep MemAvailable | grep -E -o '[0-9]+'` / 1024), // MB
-                default => throw new RuntimeException('The pulse:check command does not currently support '.PHP_OS_FAMILY),
-            },
+            'value' => $memoryUsed,
         ]);
 
         return null;
