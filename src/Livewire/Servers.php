@@ -134,6 +134,10 @@ class Servers extends Card
      */
     public function placeholder(): Renderable
     {
-        return View::make('pulse::components.servers-placeholder', ['cols' => $this->cols, 'rows' => $this->rows, 'class' => $this->class]);
+        return View::make('pulse::components.servers-placeholder', [
+            'cols' => $this->cols,
+            'rows' => $this->rows,
+            'class' => $this->class,
+        ]);
     }
 }
