@@ -76,6 +76,7 @@ class Requests
         }
 
         return null;
+
         // TODO
         return new Entry($this->table, [
             'date' => $startedAt->toDateTimeString(),
