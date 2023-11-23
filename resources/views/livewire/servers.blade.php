@@ -38,7 +38,7 @@ $rows = ! empty($rows) ? $rows : 1;
             <div class="text-xs uppercase text-left text-gray-500 dark:text-gray-400 font-bold">Memory</div>
             <div></div>
             <div class="text-xs uppercase text-left text-gray-500 dark:text-gray-400 font-bold">Storage</div>
-            @foreach ($servers as $server)
+            @foreach ($servers as $slug => $server)
                 <div wire:key="{{ $server->name }}-indicator" class="flex items-center {{ count($servers) > 1 ? 'py-2' : '' }}" :class="loadingNewDataset ? 'opacity-25 animate-pulse' : ''" title="{{ $server->updated_at->fromNow() }}">
                     @if ($server->recently_reported)
                         <div class="w-5 flex justify-center mr-1">
@@ -130,14 +130,14 @@ $rows = ! empty($rows) ? $rows : 1;
                                         return
                                     }
 
-                                    if (servers['{{ $server->slug }}'] === undefined && chart) {
+                                    if (servers['{{ $slug }}'] === undefined && chart) {
                                         chart.destroy()
                                         chart = undefined
                                         return
                                     }
 
-                                    chart.data.labels = Object.keys(servers['{{ $server->slug }}'].cpu)
-                                    chart.data.datasets[0].data = Object.values(servers['{{ $server->slug }}'].cpu)
+                                    chart.data.labels = Object.keys(servers['{{ $slug }}'].cpu)
+                                    chart.data.datasets[0].data = Object.values(servers['{{ $slug }}'].cpu)
                                     chart.update()
                                 })
                             }
@@ -229,14 +229,14 @@ $rows = ! empty($rows) ? $rows : 1;
                                         return
                                     }
 
-                                    if (servers['{{ $server->slug }}'] === undefined && chart) {
+                                    if (servers['{{ $slug }}'] === undefined && chart) {
                                         chart.destroy()
                                         chart = undefined
                                         return
                                     }
 
-                                    chart.data.labels = Object.keys(servers['{{ $server->slug }}'].memory)
-                                    chart.data.datasets[0].data = Object.values(servers['{{ $server->slug }}'].memory)
+                                    chart.data.labels = Object.keys(servers['{{ $slug }}'].memory)
+                                    chart.data.datasets[0].data = Object.values(servers['{{ $slug }}'].memory)
                                     chart.update()
                                 })
                             }
@@ -301,7 +301,7 @@ $rows = ! empty($rows) ? $rows : 1;
                                         Livewire.on('servers-chart-update', ({ servers }) => {
                                             // TODO: Figure out how to destroy the Alpine instance and remove this listener.
 
-                                            const storage = servers['{{ $server->slug }}']?.storage?.find(storage => storage.directory === '{{ $storage->directory }}')
+                                            const storage = servers['{{ $slug }}']?.storage?.find(storage => storage.directory === '{{ $storage->directory }}')
 
                                             if (chart === undefined) {
                                                 return
