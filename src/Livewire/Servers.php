@@ -2,12 +2,8 @@
 
 namespace Laravel\Pulse\Livewire;
 
-use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Str;
 use Laravel\Pulse\Queries\Servers as ServersQuery;
 use Livewire\Attributes\Lazy;
 
