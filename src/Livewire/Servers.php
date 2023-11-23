@@ -107,7 +107,6 @@ class Servers extends Card
                 $servers[$server]->memory = $readings['memory'] ?? collect([]);
             });
 
-
         // [$servers, $time, $runAt] = $this->remember($query);
 
         if (request()->hasHeader('X-Livewire')) {
