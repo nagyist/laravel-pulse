@@ -68,14 +68,14 @@ $rows = ! empty($rows) ? $rows : 1;
                                     {
                                         type: 'line',
                                         data: {
-                                            labels: @js(collect($server->cpu)->keys()),
+                                            labels: @js($server->cpu->keys()),
                                             datasets: [
                                                 {
                                                     label: 'CPU Percent',
                                                     borderColor: '#9333ea',
                                                     borderWidth: 2,
                                                     borderCapStyle: 'round',
-                                                    data: @js(collect($server->cpu)->values()),
+                                                    data: @js($server->cpu->values()),
                                                     pointHitRadius: 10,
                                                     pointStyle: false,
                                                     tension: 0.2,
@@ -167,14 +167,14 @@ $rows = ! empty($rows) ? $rows : 1;
                                     {
                                         type: 'line',
                                         data: {
-                                            labels: @js(collect($server->memory)->keys()),
+                                            labels: @js($server->memory->keys()),
                                             datasets: [
                                                 {
                                                     label: 'Memory Used',
                                                     borderColor: '#9333ea',
                                                     borderWidth: 2,
                                                     borderCapStyle: 'round',
-                                                    data: @js(collect($server->memory)->values()),
+                                                    data: @js($server->memory->values()),
                                                     pointHitRadius: 10,
                                                     pointStyle: false,
                                                     tension: 0.2,

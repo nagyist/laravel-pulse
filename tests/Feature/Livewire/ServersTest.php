@@ -89,7 +89,7 @@ it('renders server statistics', function () {
                 'storage' => [
                     (object) ['directory' => '/', 'used' => 123, 'total' => 456],
                 ],
-                'cpu' => [
+                'cpu' => collect([
                     '2000-01-02 03:05:00' => 1,
                     '2000-01-02 03:06:00' => null,
                     '2000-01-02 03:07:00' => 3,
@@ -150,8 +150,8 @@ it('renders server statistics', function () {
                     '2000-01-02 04:02:00' => 58,
                     '2000-01-02 04:03:00' => null,
                     '2000-01-02 04:04:00' => 12,
-                ],
-                'memory' => [
+                ]),
+                'memory' => collect([
                     '2000-01-02 03:05:00' => 3,
                     '2000-01-02 03:06:00' => null,
                     '2000-01-02 03:07:00' => 2,
@@ -212,7 +212,7 @@ it('renders server statistics', function () {
                     '2000-01-02 04:02:00' => 3,
                     '2000-01-02 04:03:00' => null,
                     '2000-01-02 04:04:00' => 1234,
-                ],
+                ]),
                 'updated_at' => CarbonImmutable::createFromTimestamp($timestamp),
                 'recently_reported' => true,
             ],

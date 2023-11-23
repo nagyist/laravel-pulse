@@ -27,76 +27,70 @@ class Servers extends Card
             ->where('key', 'like', 'system:%')
             ->get()
             ->mapWithKeys(function ($system) use ($now) {
-                $slug = Str::after($system->key, 'system:');
-                $values = json_decode($system->value);
+                $values = json_decode($system->value, flags: JSON_THROW_ON_ERROR);
 
-                return [$slug => (object) [
-                    'name' => $values->name,
-                    'slug' => $values->name,
-                    'cpu_current' => $values->cpu,
-                    'memory_current' => $values->memory_used,
-                    'memory_total' => $values->memory_total,
-                    'storage' => $values->storage,
-                    'updated_at' => $updatedAt = Carbon::createFromTimestamp($values->timestamp),
-                    'recently_reported' => (bool) $updatedAt->isAfter($now->subSeconds(30)),
-                ]];
+                return [
+                    Str::after($system->key, 'system:') => (object) [
+                        'name' => $values->name,
+                        'cpu_current' => $values->cpu,
+                        'memory_current' => $values->memory_used,
+                        'memory_total' => $values->memory_total,
+                        'storage' => $values->storage,
+                        'updated_at' => $updatedAt = CarbonImmutable::createFromTimestamp($values->timestamp),
+                        'recently_reported' => $updatedAt->isAfter($now->subSeconds(30)),
+                    ],
+                ];
             });
 
-        $interval = $this->periodAsInterval();
-
-        $period = $interval->totalSeconds;
-
         $maxDataPoints = 60;
-        $secondsPerPeriod = ($interval->totalSeconds / $maxDataPoints);
+        $periodInSeconds = (int) $this->periodAsInterval()->totalSeconds;
+        $secondsPerPeriod = ($periodInSeconds / $maxDataPoints);
         $currentBucket = (int) floor($now->timestamp / $secondsPerPeriod) * $secondsPerPeriod;
-        $firstBucket = $currentBucket - (($maxDataPoints - 1) * $secondsPerPeriod);
+        $earliestBucketWithinPeriod = $currentBucket - (($maxDataPoints - 1) * $secondsPerPeriod);
 
         $latestAggregatedBucket = DB::table('pulse_aggregates')
-            ->where('period', $period)
+            ->where('period', $periodInSeconds)
             ->whereIn('type', ['cpu', 'memory'])
             ->latest('bucket')
             ->value('bucket') ?? 0;
 
-        if ($latestAggregatedBucket + $secondsPerPeriod < $currentBucket) {
+        $nextBucketToAggregate = $latestAggregatedBucket + $secondsPerPeriod;
+
+        if ($nextBucketToAggregate < $currentBucket) {
             DB::table('pulse_aggregates')->insertUsing(
                 ['bucket', 'period', 'type', 'key', 'value'],
                 DB::table('pulse_entries')
                     ->selectRaw('FLOOR(`timestamp` / ?) * ? AS `bucket`', [$secondsPerPeriod, $secondsPerPeriod])
-                    ->selectRaw("$period AS `period`")
-                    ->addSelect('type')
-                    ->addSelect('key')
+                    ->selectRaw("{$periodInSeconds} AS `period`")
+                    ->addSelect('type', 'key')
                     ->selectRaw('ROUND(AVG(`value`)) AS `value`')
                     ->whereIn('type', ['cpu', 'memory'])
-                    ->where('timestamp', '>=', max($firstBucket, $latestAggregatedBucket + $secondsPerPeriod))
+                    ->where('timestamp', '>=', max($earliestBucketWithinPeriod, $nextBucketToAggregate))
                     ->where('timestamp', '<', $currentBucket)
-                    ->groupBy('key', 'bucket', 'type')
+                    ->groupBy('type', 'key', 'bucket')
             );
         }
 
         $padding = collect()
             ->range(0, 59)
-            ->mapWithKeys(fn ($i) => [Carbon::createFromTimestamp($firstBucket + $i * $secondsPerPeriod)->toDateTimeString() => null]);
+            ->mapWithKeys(fn ($i) => [
+                Carbon::createFromTimestamp($earliestBucketWithinPeriod + ($i * $secondsPerPeriod))->toDateTimeString() => null,
+            ]);
 
         DB::table('pulse_aggregates')
-            ->select([
-                'bucket',
-                'type',
-                'key',
-                'value',
-            ])
+            ->select('bucket', 'type', 'key', 'value')
+            ->where('period', $periodInSeconds)
             ->whereIn('type', ['cpu', 'memory'])
-            ->where('period', $period)
-            ->where('bucket', '>=', $firstBucket)
+            ->where('bucket', '>=', $earliestBucketWithinPeriod)
             ->orderBy('bucket')
             ->unionAll(
                 DB::table('pulse_entries')
-                    ->selectRaw("$currentBucket AS `bucket`")
-                    ->addSelect('type')
-                    ->addSelect('key')
+                    ->selectRaw("{$currentBucket} AS `bucket`")
+                    ->addSelect('type', 'key')
                     ->selectRaw('ROUND(AVG(`value`)) AS `value`')
                     ->whereIn('type', ['cpu', 'memory'])
                     ->where('timestamp', '>=', $currentBucket)
-                    ->groupBy('key', 'type')
+                    ->groupBy('type', 'key')
             )
             ->get()
             ->groupBy('key')
@@ -109,9 +103,10 @@ class Servers extends Card
                 ))
             )
             ->each(function ($readings, $server) use (&$servers) {
-                $servers[$server]->cpu = $readings['cpu']?->toArray() ?? [];
-                $servers[$server]->memory = $readings['memory']?->toArray() ?? [];
+                $servers[$server]->cpu = $readings['cpu'] ?? collect([]);
+                $servers[$server]->memory = $readings['memory'] ?? collect([]);
             });
+
 
         // [$servers, $time, $runAt] = $this->remember($query);
 
