@@ -57,10 +57,10 @@ class Servers
 
                 return [
                     Str::after($system->key, 'system:') => (object) [
-                        'name' => $values->name,
-                        'cpu_current' => $values->cpu,
-                        'memory_current' => $values->memory_used,
-                        'memory_total' => $values->memory_total,
+                        'name' => (string) $values->name,
+                        'cpu_current' => (int) $values->cpu,
+                        'memory_current' => (int) $values->memory_used,
+                        'memory_total' => (int) $values->memory_total,
                         'storage' => $values->storage,
                         'updated_at' => $updatedAt = CarbonImmutable::createFromTimestamp($values->timestamp),
                         'recently_reported' => $updatedAt->isAfter($now->subSeconds(30)),
@@ -73,15 +73,12 @@ class Servers
         $secondsPerPeriod = ($periodInSeconds / $maxDataPoints);
         $currentBucket = (int) floor($now->timestamp / $secondsPerPeriod) * $secondsPerPeriod;
         $earliestBucketWithinPeriod = $currentBucket - (($maxDataPoints - 1) * $secondsPerPeriod);
-
-        $latestAggregatedBucket = $this->db->connection()
+        $nextBucketToAggregate = $secondsPerPeriod + ($this->db->connection()
             ->table('pulse_aggregates')
             ->where('period', $periodInSeconds)
             ->whereIn('type', ['cpu', 'memory'])
             ->latest('bucket')
-            ->value('bucket') ?? 0;
-
-        $nextBucketToAggregate = $latestAggregatedBucket + $secondsPerPeriod;
+            ->value('bucket') ?? 0);
 
         if ($nextBucketToAggregate < $currentBucket) {
             $this->db->connection()
