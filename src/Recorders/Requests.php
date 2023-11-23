@@ -75,6 +75,8 @@ class Requests
             return null;
         }
 
+        return null;
+        // TODO
         return new Entry($this->table, [
             'date' => $startedAt->toDateTimeString(),
             'route' => $request->method().' '.$path.($via ? " ($via)" : ''),
