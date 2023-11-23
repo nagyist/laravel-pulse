@@ -12,7 +12,7 @@ use Livewire\Attributes\Lazy;
 #[Lazy]
 class SlowJobs extends Card
 {
-    use Concerns\HasPeriod, Concerns\RemembersQueries;
+    use Concerns\HasPeriod, Concerns\ResolvesQueries;
 
     /**
      * Render the component.
