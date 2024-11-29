@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Laravel\Pulse\Facades\Pulse;
@@ -120,4 +121,22 @@ it('trims aggregates once the 7 day bucket is no longer relevant', function () {
     Date::setTestNow('2000-01-07 23:36:00'); // The second the oldest bucket become irrelevant.
     App::make(DatabaseStorage::class)->trim();
     expect(DB::table('pulse_aggregates')->where('period', 10080)->count())->toBe(1);
+});
+
+it('can configure days of data to keep when trimming', function () {
+    Config::set('pulse.ingest.trim.keep', '14 days');
+
+    Date::setTestNow('2000-01-01 00:00:04');
+    Pulse::record('foo', 'xxxx', 1);
+    Date::setTestNow('2000-01-01 00:00:05');
+    Pulse::record('bar', 'xxxx', 1);
+    Date::setTestNow('2000-01-01 00:00:06');
+    Pulse::record('baz', 'xxxx', 1);
+    Pulse::ingest();
+
+    Pulse::stopRecording();
+    Date::setTestNow('2000-01-15 00:00:05');
+    App::make(DatabaseStorage::class)->trim();
+
+    expect(DB::table('pulse_entries')->pluck('type')->all())->toBe(['baz']);
 });

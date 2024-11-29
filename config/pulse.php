@@ -83,7 +83,7 @@ return [
 
         'trim' => [
             'lottery' => [1, 1_000],
-            'keep' => '7 days',
+            'keep' => env('PULSE_INGEST_KEEP', '7 days'),
         ],
 
         'redis' => [
