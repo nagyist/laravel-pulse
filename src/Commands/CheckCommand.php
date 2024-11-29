@@ -68,11 +68,23 @@ class CheckCommand extends Command
 
             $pulse->ingest();
 
+            $this->ensureTelescopeEntriesAreCollected();
+
             if ($isVapor || $this->option('once')) {
                 return self::SUCCESS;
             }
 
             Sleep::until($now->addSecond());
+        }
+    }
+
+    /**
+     * Schedule Telescope to store entries if enabled.
+     */
+    protected function ensureTelescopeEntriesAreCollected(): void
+    {
+        if ($this->laravel->bound(\Laravel\Telescope\Contracts\EntriesRepository::class)) {
+            \Laravel\Telescope\Telescope::store($this->laravel->make(\Laravel\Telescope\Contracts\EntriesRepository::class));
         }
     }
 }

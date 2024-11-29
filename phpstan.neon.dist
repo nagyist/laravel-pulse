@@ -2,3 +2,6 @@ parameters:
   paths:
     - src
   level: 8
+  ignoreErrors:
+    - "#Class Laravel\\\\Telescope\\\\Contracts\\\\EntriesRepository not found#"
+    - "#Call to static method store\\(\\) on an unknown class Laravel\\\\Telescope\\\\Telescope#"
