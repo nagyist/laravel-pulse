@@ -1,6 +1,13 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/pulse/compare/v1.2.7...1.x)
+## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.0...1.x)
+
+## [v1.3.0](https://github.com/laravel/pulse/compare/v1.2.7...v1.3.0) - 2024-12-02
+
+* [1.x] Ensure run at is always returned to the front end in UTC by [@timacdonald](https://github.com/timacdonald) in https://github.com/laravel/pulse/pull/425
+* [1.x] Add Configurable Trim Duration for Pulse Data Storage by [@tharlei](https://github.com/tharlei) in https://github.com/laravel/pulse/pull/424
+* [1.x] Prevent memory leak on `pulse:check` command when using Telescope by [@gdebrauwer](https://github.com/gdebrauwer) in https://github.com/laravel/pulse/pull/426
+* [1.x] Use dedicated config value for trimming storage by [@timacdonald](https://github.com/timacdonald) in https://github.com/laravel/pulse/pull/427
 
 ## [v1.2.7](https://github.com/laravel/pulse/compare/v1.2.6...v1.2.7) - 2024-11-25
 
