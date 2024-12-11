@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.0...1.x)
+## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.1...1.x)
+
+## [v1.3.1](https://github.com/laravel/pulse/compare/v1.3.0...v1.3.1) - 2024-12-11
+
+* Method visibility patch by [@angelej](https://github.com/angelej) in https://github.com/laravel/pulse/pull/429
 
 ## [v1.3.0](https://github.com/laravel/pulse/compare/v1.2.7...v1.3.0) - 2024-12-02
 
