@@ -55,11 +55,23 @@ class WorkCommand extends Command
                 $lastTrimmedStorageAt = $now;
             }
 
+            $this->ensureTelescopeEntriesAreCollected();
+
             if ($this->option('stop-when-empty')) {
                 return self::SUCCESS;
             }
 
             Sleep::for(1)->second();
+        }
+    }
+
+    /**
+     * Schedule Telescope to store entries if enabled.
+     */
+    protected function ensureTelescopeEntriesAreCollected(): void
+    {
+        if ($this->laravel->bound(\Laravel\Telescope\Contracts\EntriesRepository::class)) {
+            \Laravel\Telescope\Telescope::store($this->laravel->make(\Laravel\Telescope\Contracts\EntriesRepository::class));
         }
     }
 }
