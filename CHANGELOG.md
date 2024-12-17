@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.1...1.x)
+## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.2...1.x)
+
+## [v1.3.2](https://github.com/laravel/pulse/compare/v1.3.1...v1.3.2) - 2024-12-12
+
+* [1.x] Prevent memory leak on `pulse:work` command when using Telescope by [@gdebrauwer](https://github.com/gdebrauwer) in https://github.com/laravel/pulse/pull/430
 
 ## [v1.3.1](https://github.com/laravel/pulse/compare/v1.3.0...v1.3.1) - 2024-12-11
 
