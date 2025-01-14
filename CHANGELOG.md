@@ -1,6 +1,11 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.2...1.x)
+## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.3...1.x)
+
+## [v1.3.3](https://github.com/laravel/pulse/compare/v1.3.2...v1.3.3) - 2025-01-02
+
+* [1.x] Add nested controller route grouping by [@timacdonald](https://github.com/timacdonald) in https://github.com/laravel/pulse/pull/433
+* [1.x] Supports Relay driver on PHP 8.4 by [@crynobone](https://github.com/crynobone) in https://github.com/laravel/pulse/pull/421
 
 ## [v1.3.2](https://github.com/laravel/pulse/compare/v1.3.1...v1.3.2) - 2024-12-12
 
