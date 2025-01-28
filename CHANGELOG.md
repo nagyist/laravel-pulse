@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.3...1.x)
+## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.4...1.x)
+
+## [v1.3.4](https://github.com/laravel/pulse/compare/v1.3.3...v1.3.4) - 2025-01-28
+
+* Supports Laravel 12 by [@crynobone](https://github.com/crynobone) in https://github.com/laravel/pulse/pull/438
 
 ## [v1.3.3](https://github.com/laravel/pulse/compare/v1.3.2...v1.3.3) - 2025-01-02
 
