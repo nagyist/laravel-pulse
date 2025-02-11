@@ -1,6 +1,14 @@
 # Release Notes
 
-## [Unreleased](https://github.com/laravel/pulse/compare/v1.3.4...1.x)
+## [Unreleased](https://github.com/laravel/pulse/compare/v1.4.0...1.x)
+
+## [v1.4.0](https://github.com/laravel/pulse/compare/v1.3.4...v1.4.0) - 2025-02-11
+
+* [1.x] Fix background color for overscroll-bounce by [@angelej](https://github.com/angelej) in https://github.com/laravel/pulse/pull/442
+* [1.x] Fix: Keep select fields open by [@angelej](https://github.com/angelej) in https://github.com/laravel/pulse/pull/441
+* Allow system default of dark mode if theme value is unrecognized by [@J-T-McC](https://github.com/J-T-McC) in https://github.com/laravel/pulse/pull/440
+* [1.x] Fix empty state for the exceptions card by [@angelej](https://github.com/angelej) in https://github.com/laravel/pulse/pull/439
+* [1.x] Encode slow queries if highlighting is disabled by [@angelej](https://github.com/angelej) in https://github.com/laravel/pulse/pull/443
 
 ## [v1.3.4](https://github.com/laravel/pulse/compare/v1.3.3...v1.3.4) - 2025-01-28
 
